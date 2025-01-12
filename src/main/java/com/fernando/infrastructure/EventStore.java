@@ -11,6 +11,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.StandardOpenOption;
 import java.util.function.Consumer;
 
+import com.fernando.utils.FileSystem;
+import com.fernando.utils.FileToJsonConverter;
+
 public class EventStore implements AutoCloseable {
 
     private static final String path = "eventStore.txt";
@@ -20,87 +23,81 @@ public class EventStore implements AutoCloseable {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     public EventStore() {
-        ensureFileExists();
+        FileSystem.EnsureFileExists(path);
         objectMapper.registerModule(new JavaTimeModule());
-        mapFileToMemory();
+        tryMapFileToMemory();
+    }
+
+    private void tryMapFileToMemory() {
+        try {
+            mapFileToMemory();
+        } catch (IOException e) {
+            System.err.println("Erro ao mapear o arquivo para memória: " + e.getMessage()); //Use logging.
+        }
     }
 
     private void mapFileToMemory() {
+        file = new RandomAccessFile(path, "rw");
+        fileChannel = file.getChannel();
+        long fileLength = file.length();
+        buffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, fileLength);
+    }
+
+    public void tryAppend(Object event) {
         try {
-            file = new RandomAccessFile(path, "rw");
-            fileChannel = file.getChannel();
-            long fileLength = file.length();
-            buffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, fileLength);
+            append(event);
         } catch (IOException e) {
-            System.err.println("Erro ao mapear o arquivo para memória: " + e.getMessage());
+            System.err.println("Erro ao tentar escrever no arquivo de event store: " + e.getMessage()); //Use logging.
         }
     }
 
-    public void append(Object event) {
-        try {
-            String jsonEvent = convertObjectToJson(event);
-            byte[] eventBytes = jsonEvent.getBytes(StandardCharsets.UTF_8);
+    private void append(Object event) {
+        String jsonEvent = FileToJsonConverter.TryConvertObjectToJson(event);
+        byte[] eventBytes = jsonEvent.getBytes(StandardCharsets.UTF_8);
 
-            long currentLength = buffer.limit();
-            long newLength = currentLength + eventBytes.length + 1;
+        long currentLength = buffer.limit();
+        long newLength = currentLength + eventBytes.length + 1;
 
-            buffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, newLength);
+        buffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, newLength);
 
-            buffer.position((int) currentLength);
-            buffer.put(eventBytes);
-            buffer.put((byte) '\n');
-        } catch (IOException e) {
-            System.err.println("Erro ao tentar escrever no arquivo de event store: " + e.getMessage());
-        }
+        buffer.position((int) currentLength);
+        buffer.put(eventBytes);
+        buffer.put((byte) '\n');
     }
 
-    public void consume(Consumer<String> action, Long offset) {
+    public void tryConsume(Consumer<String> action, Long offset) {
         try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
-            String line = null;
-            for (int i = 1; i <= offset; i++) {
-                line = reader.readLine();
-            }
-
-            if(line == null){
-                System.out.println("O arquivo não tem tantas linhas.");
-                return;
-            }
-            action.accept(line);
+            consume(reader, action, offset);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void stream(Consumer<String> action) {
+    private void consume(BufferedReader reader, Consumer<String> action, Long offset) {
+        String line = null;
+        for (int i = 1; i <= offset; i++) {
+            line = reader.readLine();
+        }
+
+        if(line == null){
+            System.out.println("O arquivo não tem tantas linhas."); //Use logging.
+            return;
+        }
+        action.accept(line);
+    }
+
+    public void tryStream(Consumer<String> action) {
         try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                action.accept(line);
-            }
+            stream(reader, action);
         } catch (IOException e) {
-            System.err.println("Erro ao tentar ler o arquivo de event store: " + e.getMessage());
+            System.err.println("Erro ao tentar ler o arquivo de event store: " + e.getMessage()); //Use logging.
         }
     }
 
-    private void ensureFileExists() {
-        File file = new File(path);
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-                System.out.println("Arquivo de event store criado: " + path);
-            } catch (IOException e) {
-                System.err.println("Erro ao criar o arquivo de event store: " + e.getMessage());
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    private String convertObjectToJson(Object object) throws JsonProcessingException {
-        try {
-            return objectMapper.writeValueAsString(object);
-        } catch (IOException e) {
-            System.err.println("Erro ao converter objeto para JSON: " + e.getMessage());
-            throw e;
+    private void stream(BufferedReader reader, Consumer<String> action) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            action.accept(line);
         }
     }
 

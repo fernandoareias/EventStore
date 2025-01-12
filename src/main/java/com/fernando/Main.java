@@ -12,7 +12,7 @@ public class Main {
 
         try(var eventStore = new EventStore())
         {
-            eventStore.append(new BankAccountOpened(
+            eventStore.tryAppend(new BankAccountOpened(
                     UUID.randomUUID(),
                     "8257388405513933",
                     UUID.randomUUID(),
@@ -22,10 +22,10 @@ public class Main {
             ));
 
             System.out.println("Iniciando leitura");
-            eventStore.stream(System.out::println);
+            eventStore.tryStream(System.out::println);
 
             System.out.println("Lendo o evento de offset 4");
-            eventStore.consume(System.out::println, 4L);
+            eventStore.tryConsume(System.out::println, 4L);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (Exception e) {
