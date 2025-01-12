@@ -1,0 +1,7 @@
+{"bankAccountId":"cbebcf3e-8d36-4d80-8e71-9518c854a0ef","accountNumber":"8257388405513933","clienteId":"5dc43925-7d29-4de7-81da-09d7077aacab","currencyISOCode":"USD","createdAt":1736690881.009568000,"version":1}
+{"bankAccountId":"c5b7ab7c-9616-4ea0-bdd6-2f5b3fcfb1b9","accountNumber":"8257388405513933","clienteId":"84943f75-005f-4ce5-87d0-b2088141b3a6","currencyISOCode":"USD","createdAt":1736690915.628341000,"version":1}
+{"bankAccountId":"2513cb38-6f5e-4b5a-ae4d-330228e04893","accountNumber":"8257388405513933","clienteId":"c9eca75c-d453-4500-bca6-567acd7002ad","currencyISOCode":"USD","createdAt":1736690978.831953000,"version":1}
+{"bankAccountId":"08188940-3dc0-497d-ae96-c1a5d328bb90","accountNumber":"8257388405513933","clienteId":"ebe861d5-c5b9-4edd-a1f8-a8a27e2ace3b","currencyISOCode":"USD","createdAt":1736691021.992768000,"version":1}
+{"bankAccountId":"77a92eb3-41cf-4b51-a8fd-7735d5aba1a0","accountNumber":"8257388405513933","clienteId":"0d56de3d-5d46-40f4-a69d-f3f33448c53e","currencyISOCode":"USD","createdAt":1736691032.533550000,"version":1}
+{"bankAccountId":"bf31b57b-25dc-45dd-bdb6-51debb32b13e","accountNumber":"8257388405513933","clienteId":"2770069a-f94c-4166-b951-ab6a0bc8323d","currencyISOCode":"USD","createdAt":1736691094.308813000,"version":1}
+{"bankAccountId":"95b5513e-5c9a-4d90-bb83-6d4e4907269e","accountNumber":"8257388405513933","clienteId":"f3bb2a62-6e68-444f-8a7a-b2a96846d470","currencyISOCode":"USD","createdAt":1736691103.804929000,"version":1}
